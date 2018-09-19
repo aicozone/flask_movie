@@ -1,15 +1,6 @@
 # 数据模型文件, 包含用户, 用户日志, 标签, 电影, 上映预告, 评论, 收藏, 权限, 角色, 管理员登录日志, 管理员操作日志
-from flask import Flask
-from flask_sqlalchemy import SQLAlchemy
 from datetime import datetime
-import pymysql
-
-app = Flask(__name__)
-app.config["SQLALCHEMY_DATABASE_URI"] = "mysql+pymysql://root:password@localhost:3306/movie_db?charset=utf8"
-app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = True
-
-db = SQLAlchemy(app)
-
+from app import db
 
 # 用户
 class User(db.Model):
@@ -157,6 +148,10 @@ class Admin(db.Model):
     def __repr__(self):
         return '<Admin %r>' % self.name
 
+    def check_pwd(self, pwd):
+        from werkzeug.security import check_password_hash
+        return check_password_hash(self.pwd, pwd)
+
 
 # 管理员登录日志
 class Adminlog(db.Model):
@@ -182,24 +177,24 @@ class Oplog(db.Model):
     def __repr__(self):
         return '<Oplog %r>' % self.id
 
-if __name__ == "__main__":
-    # 创建表
-    # db.create_all()
-    # 删除表
-    # db.drop_all()
-    # role = Role(
-    #     name="超级管理员",
-    #     auths="",
-    # )
-    # db.session.add(role)
-    # db.session.commit()
-    # 插入管理员字段
-    from werkzeug.security import generate_password_hash
-    admin = Admin(
-        name="movie_test1",
-        pwd=generate_password_hash("123"),
-        is_super=0,
-        role_id=1,
-    )
-    db.session.add(admin)
-    db.session.commit()
+# if __name__ == "__main__":
+#     # 创建表
+#     # db.create_all()
+#     # 删除表
+#     # db.drop_all()
+#     # role = Role(
+#     #     name="超级管理员",
+#     #     auths="",
+#     # )
+#     # db.session.add(role)
+#     # db.session.commit()
+#     # 插入管理员字段
+#     from werkzeug.security import generate_password_hash
+#     admin = Admin(
+#         name="movie_test1",
+#         pwd=generate_password_hash("123"),
+#         is_super=0,
+#         role_id=1,
+#     )
+#     db.session.add(admin)
+#     db.session.commit()

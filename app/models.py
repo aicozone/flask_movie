@@ -51,17 +51,17 @@ class Movietag(db.Model):
 class Movie(db.Model):
     __tablename__ = "movie"
     id = db.Column(db.Integer, primary_key=True)  # 编号
-    title = db.Column(db.String(255), unique=True)
-    url = db.Column(db.String(255), unique=True)
-    info = db.Column(db.Text)
-    logo = db.Column(db.String(255), unique=True)
-    star = db.Column(db.SmallInteger)
-    play_num = db.Column(db.BigInteger)
-    comment_num = db.Column(db.BigInteger)
-    tag_id = db.Column(db.Integer, db.ForeignKey("movietag.id"))
-    area = db.Column(db.String(255))
-    release_time = db.Column(db.Date)
-    length = db.Column(db.String(100))
+    title = db.Column(db.String(255), unique=True) # 标题
+    url = db.Column(db.String(255), unique=True)    # 存储地址
+    info = db.Column(db.Text)   # 电影信息
+    logo = db.Column(db.String(255), unique=True)   # 电影图标
+    star = db.Column(db.SmallInteger)       # 电影评分
+    play_num = db.Column(db.BigInteger)     # 播放量
+    comment_num = db.Column(db.BigInteger)  # 评论量
+    tag_id = db.Column(db.Integer, db.ForeignKey("movietag.id"))    # 标签
+    area = db.Column(db.String(255))    # 地区
+    release_time = db.Column(db.Date)   # 上映时间
+    length = db.Column(db.String(100))  # 片长
     addtime = db.Column(db.DateTime, index=True, default=datetime.now)  # 电影添加时间
     comments = db.relationship('Comment', backref='movie')  # 电影外键关联
     movie_cols = db.relationship('Movie_col', backref='movie')  # 电影外键关联

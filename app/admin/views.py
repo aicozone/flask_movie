@@ -8,8 +8,15 @@ from flask import (
     session,
     request,
 )
-from .forms import LoginForm
-from app.models import Admin
+from .forms import (
+    LoginForm,
+    TagForm,
+)
+from app.models import (
+    Admin,
+    Movietag,
+)
+from app import db
 from functools import wraps
 
 
@@ -60,19 +67,69 @@ def pwd():
     return render_template("admin/pwd.html")
 
 
-# 编辑标签
-@admin.route("/tag_add")
+# 添加标签
+@admin.route("/tag_add", methods=["GET", "POST"])
 @admin_login_required
 def tag_add():
-    return render_template("admin/tag_add.html")
+    form = TagForm()
+    if form.validate_on_submit():
+        data = form.data
+        tag = Movietag.query.filter_by(name=data["name"]).count()
+        if tag == 1:
+            flash("名称已经存在！", "error")
+            return redirect(url_for("admin.tag_add"))
+        tag = Movietag(
+            name=data["name"]
+        )
+        db.session.add(tag)
+        db.session.commit()
+        flash("添加标签成功", "ok")
+        return redirect(url_for("admin.tag_add"))
+    return render_template("admin/tag_add.html", form=form)
+
+
+# 编辑标签
+@admin.route("/tag_edit/<int:id>", methods=["GET", "POST"])
+@admin_login_required
+def tag_edit(id=None):
+    form = TagForm()
+    tag = Movietag.query.get_or_404(id)
+    if form.validate_on_submit():
+        data = form.data
+        tag_count = Movietag.query.filter_by(name=data["name"]).count()
+        if tag_count == 1 and tag.name != data["name"]:
+            flash("名称已经存在！", "error")
+            return redirect(url_for("admin.tag_edit", id=id))
+        tag.name = data["name"]
+        db.session.add(tag)
+        db.session.commit()
+        flash("修改标签成功", "ok")
+        return redirect(url_for("admin.tag_edit", id=id))
+    return render_template("admin/tag_edit.html", form=form, tag=tag)
 
 
 # 标签列表
-@admin.route("/tag_list")
+@admin.route("/tag_list/<int:page>", methods=["GET"])
 @admin_login_required
-def tag_list():
-    return render_template("admin/tag_list.html")
+def tag_list(page):
+    if page is None:
+        page = 1
+    # 分页信息
+    page_data = Movietag.query.order_by(
+        Movietag.addtime
+    ).paginate(page=page, per_page=10)
+    return render_template("admin/tag_list.html",page_data=page_data)
 
+
+# 标签删除
+@admin.route("/tag_del/<int:id>", methods=["GET"])
+@admin_login_required
+def tag_del(id=None):
+    tag = Movietag.query.filter_by(id=id).first_or_404()
+    db.session.delete(tag)
+    db.session.commit()
+    flash("删除标签成功", "ok")
+    return redirect(url_for("admin.tag_list", page=1))
 
 # 添加电影
 @admin.route("/movie_add")

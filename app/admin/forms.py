@@ -45,7 +45,28 @@ class LoginForm(FlaskForm):
 
     def validate_account(self, field):
         """验证账户"""
-        account = field.data
+        account = field.data  # 这里的 field.data 相当于 form.account
         admin_num = Admin.query.filter_by(name=account).count()
         if admin_num == 0:
             raise ValidationError("账号不存在！")
+
+
+class TagForm(FlaskForm):
+    name = StringField(
+        label="标签名称",
+        validators=[
+            DataRequired("请输入标签名称！")
+        ],
+        description="标签",
+        render_kw={
+            "class":"form-control",
+            "id":"input_name",
+            "placeholder":"请输入标签名称！"
+        }
+    )
+    submit = SubmitField(
+        "编辑",
+        render_kw={
+            "class": "btn btn-primary",
+        }
+    )

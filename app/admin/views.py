@@ -1,4 +1,4 @@
-# 视图处理文件
+# 视图处理文件， 包含管理员的登录面板，标签管理，电影管理，预告管理，会员管理，评论收藏管理，密码修改，日志管理
 from . import admin
 from flask import (
     render_template,
@@ -19,6 +19,7 @@ from app.models import (
     Movietag,
     Movie,
     Preview,
+    User,
 )
 from app import (
     app,
@@ -350,10 +351,34 @@ def preview_edit(id=None):
 
 
 # 会员列表
-@admin.route("/user_list")
+@admin.route("/user_list/<int:page>", methods=["GET"])
 @admin_login_required
-def user_list():
-    return render_template("admin/user_list.html")
+def user_list(page=None):
+    if page is None:
+        page = 1
+    page_data = User.query.order_by(
+        User.addtime
+    ).paginate(page=page, per_page=10)
+    return render_template("admin/user_list.html", page_data=page_data)
+
+
+# 查看会员
+@admin.route("/user_view/<int:id>", methods=["GET"])
+@admin_login_required
+def user_view(id=None):
+    user = User.query.get_or_404(int(id))
+    return render_template("admin/user_view.html", user=user)
+
+
+# 删除会员
+@admin.route("/user_del/<int:id>", methods=["GET"])
+@admin_login_required
+def user_del(id=None):
+    user = User.query.get_or_404(id)
+    db.session.delete(user)
+    db.session.commit()
+    flash("删除会员成功", "ok")
+    return redirect(url_for("admin.user_list", page=1))
 
 
 # 评论列表

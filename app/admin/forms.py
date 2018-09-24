@@ -62,6 +62,7 @@ class LoginForm(FlaskForm):
 
 
 class TagForm(FlaskForm):
+    """标签管理表单"""
     name = StringField(
         label="标签名称",
         validators=[
@@ -192,6 +193,38 @@ class MovieForm(FlaskForm):
     )
     submit = SubmitField(
         "添加",
+        render_kw={
+            "class": "btn btn-primary",
+        }
+    )
+
+
+class PreviewForm(FlaskForm):
+    """预告管理表单"""
+    title = StringField(
+        label='预告标题',
+        validators=[
+            DataRequired('请输入预告标题')
+        ],
+        description='预告标题',
+        render_kw={
+            "class":"form-control",
+            "id":"input_title",
+            "placeholder":"请输入预告标题！",
+        }
+    )
+    logo = FileField(
+        label="预告封面",
+        validators=[
+            DataRequired("请上传预告封面！")
+        ],
+        description="预告封面",
+        render_kw={
+            "id": "input_logo",
+        }
+    )
+    submit = SubmitField(
+        '添加',
         render_kw={
             "class": "btn btn-primary",
         }

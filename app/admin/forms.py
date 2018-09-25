@@ -1,4 +1,5 @@
 # 表单处理文件
+from flask import session
 from flask_wtf import FlaskForm
 from wtforms import (
     StringField,
@@ -25,13 +26,13 @@ class LoginForm(FlaskForm):
     account = StringField(
         label="账号",
         validators=[
-            DataRequired("请输入账号！")
+            DataRequired("请输入！")
         ],
         description="账号",
         render_kw={
             "class": "form-control",
             "placeholder": "请输入账号！",
-            "required": "required",
+            "DataRequired": "DataRequired",
         }
     )
     pwd = PasswordField(
@@ -43,7 +44,7 @@ class LoginForm(FlaskForm):
         render_kw={
             "class": "form-control",
             "placeholder": "请输入密码！",
-            "required": "required",
+            "DataRequired": "DataRequired",
         }
     )
     submit = SubmitField(
@@ -208,9 +209,9 @@ class PreviewForm(FlaskForm):
         ],
         description='预告标题',
         render_kw={
-            "class":"form-control",
-            "id":"input_title",
-            "placeholder":"请输入预告标题！",
+            "class": "form-control",
+            "id": "input_title",
+            "placeholder": "请输入预告标题！",
         }
     )
     logo = FileField(
@@ -229,3 +230,44 @@ class PreviewForm(FlaskForm):
             "class": "btn btn-primary",
         }
     )
+
+
+class PwdForm(FlaskForm):
+    """密码管理表单"""
+    old_pwd = PasswordField(
+        label="旧密码",
+        validators=[
+            DataRequired("请输入旧密码！")
+        ],
+        description="旧密码",
+        render_kw={
+            "class": "form-control",
+            "id": "input_pwd",
+            "placeholder": "请输入旧密码！",
+        }
+    )
+    new_pwd = PasswordField(
+        label="新密码",
+        validators=[
+            DataRequired("请输入新密码！")
+        ],
+        description="新密码",
+        render_kw={
+            "class": "form-control",
+            "id": "input_newpwd",
+            "placeholder": "请输入新密码！",
+        }
+    )
+    submit = SubmitField(
+        '修改',
+        render_kw={
+            "class": "btn btn-primary",
+        }
+    )
+
+    def validate_old_pwd(self, field):
+        """验证旧密码"""
+        old_pwd = field.data  # 这里的 field.data 相当于 form.account
+        admin = Admin.query.filter_by(name=session['admin']).first()
+        if not admin.check_pwd(old_pwd):
+            raise ValidationError("旧密码错误！")
